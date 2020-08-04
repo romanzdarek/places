@@ -1,0 +1,21 @@
+{
+	"name": "locations-client",
+	"version": "1.0.0",
+	"description": "",
+	"private": true,
+	"scripts": {
+		"test": "echo \"Error: no test specified\" && exit 1",
+		"build": "webpack",
+		"watch": "webpack --watch",
+		"dev": "webpack-dev-server --open"
+	},
+	"author": "",
+	"license": "ISC",
+	"devDependencies": {
+		"ts-loader": "^5.3.3",
+		"typescript": "^3.3.3333",
+		"webpack": "^4.29.6",
+		"webpack-cli": "^3.2.3",
+		"webpack-dev-server": "^3.2.1"
+	}
+}

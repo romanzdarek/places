@@ -1,0 +1,29 @@
+<div class="padding">
+    <div class="row">
+        <div class="col-lg-6">
+            <table class="table">
+                <tr>
+                    <th>ID</th><td>{{location.id}}</td>
+                </tr>
+                <tr>
+                    <th>Title</th><td>{{location.title}}</td>
+                </tr>
+                <tr>
+                    <th>Content</th><td>{{location.content}}</td>
+                </tr>
+                <tr>
+                    <th>GPS</th><td>{{location.gps}}</td>
+                </tr>
+                <tr>
+                   <th>Image</th><td>{{location.images}}</td>
+                </tr>
+            </table>
+        </div>
+        <div class="col-lg-6">
+            <img class="img-thumbnail" style="width:500px;" src="{{root}}uploads/{{location.images}}" alt="http://192.168.0.2:8000/uploads/{{location.images}}">
+        </div>
+      </div>
+  
+</div>
+
+
