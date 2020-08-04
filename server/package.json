@@ -1,0 +1,30 @@
+{
+	"name": "expressapi",
+	"version": "1.0.0",
+	"description": "",
+	"main": "dist/app.js",
+	"scripts": {
+		"test": "echo \"Error: no test specified\" && exit 1",
+		"start": "node dist/app.js",
+		"ts": "tsc -w",
+		"nodemon": "nodemon",
+		"dev": "concurrently -n ts,nodemon npm:ts npm:nodemon"
+	},
+	"author": "",
+	"license": "ISC",
+	"devDependencies": {
+		"@types/express": "^4.17.7",
+		"@types/node": "^14.0.23",
+		"concurrently": "^5.2.0",
+		"nodemon": "^2.0.4",
+		"ts-loader": "^8.0.1",
+		"typescript": "^3.9.7"
+	},
+	"dependencies": {
+		"express": "^4.17.1",
+		"multer": "^1.4.2",
+		"path": "^0.12.7",
+		"source-map-support": "^0.5.19",
+		"sqlite3": "^5.0.0"
+	}
+}
