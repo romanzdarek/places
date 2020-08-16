@@ -38,7 +38,7 @@ export default class CRUDManager {
 		return new Promise((resolve, reject) => {
 			this.connectDB();
 			this.db.run(
-				`UPDATE ${this.dbTable} SET gps="${gps}", images="${images}", tags="${tags}", title=" ${title}", content="${content}" WHERE id=" ${id}"`,
+				`UPDATE ${this.dbTable} SET gps="${gps}", images="${images}", tags="${tags}", title="${title}", content="${content}" WHERE id="${id}"`,
 				(err: any) => {
 					if (err) {
 						console.log(err);

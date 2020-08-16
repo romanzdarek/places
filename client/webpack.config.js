@@ -7,7 +7,11 @@ module.exports = {
 	//development:
 	//mode: 'development',
 
-	entry: './src/app.ts',
+	//entry: './src/app.ts',
+	entry: {
+		app: './src/app.ts',
+		core: './src/core.ts'
+	},
 	//production:
 
 	devtool: 'source-map',
@@ -29,8 +33,14 @@ module.exports = {
 	resolve: {
 		extensions: [ '.tsx', '.ts', '.js' ]
 	},
+	/*
 	output: {
 		filename: 'app.js',
 		path: path.resolve(__dirname, 'dist')
+	}
+	*/
+	output: {
+		filename: '[name].js',
+		path: path.resolve(__dirname, './dist')
 	}
 };

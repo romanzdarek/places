@@ -1,5 +1,6 @@
-declare const angular: any;
-const app = angular.module('locationsApp', [ 'ngRoute' ]);
+import * as Angular from 'angular';
+declare const angular: Angular.IAngularStatic;
+const app = angular.module('locationsApp', [ 'core', 'ngRoute' ]);
 const root = 'http://127.0.0.1:8000/';
 
 app.config([
@@ -8,7 +9,7 @@ app.config([
 		$routeProvider
 			.when('/all', { controller: 'MainController', templateUrl: '/views/main.html', reloadOnSearch: false })
 			.when('/location/:id', { controller: 'LocationController', templateUrl: '/views/location.html' })
-			.when('/create', { controller: 'CreateController', templateUrl: '/views/create.html' })
+			.when('/add', { controller: 'AddController', templateUrl: '/views/add.html' })
 			.when('/update/:id', { controller: 'UpdateController', templateUrl: '/views/update.html' })
 			.otherwise({ redirectTo: '/all' });
 	}
@@ -22,7 +23,6 @@ app.directive('fileModel', [
 			link: (scope: any, element: any, attrs: any) => {
 				const model = $parse(attrs.fileModel);
 				const modelSetter = model.assign;
-
 				element.bind('change', () => {
 					scope.$apply(() => {
 						modelSetter(scope, element[0].files[0]);
@@ -33,13 +33,38 @@ app.directive('fileModel', [
 	}
 ]);
 
+
+app.component('navigation', {
+	templateUrl: '/views/navigation.html',
+	controller: [
+		'$location',
+		function NavigationController($location: any) {
+			this.getClass = function(path: string) {
+				return $location.path().substr(0, path.length) === path ? 'active' : '';
+			};
+		}
+	]
+});
+
+/*
+app.controller('NavigationController', [
+	'$scope',
+	'$location',
+	($scope: any, $location: any) => {
+		$scope.getClass = function(path: string) {
+			return $location.path().substr(0, path.length) === path ? 'active' : '';
+		};
+	}
+]);
+*/
+
 app.controller('MainController', [
 	'$scope',
 	'$http',
 	'$location',
-	($scope: any, $http: any, $location: any) => {
-		console.log('zapinam main controller');
-		$scope.root = root;
+	($scope: any, $http: Angular.IHttpService, $location: any) => {
+		console.log('Zapínam MainController');
+		(<any>$scope).root = root;
 		$scope.myFilter = { title: $location.search().filtr };
 		$scope.sortBy = 'id';
 		$scope.reverse = true;
@@ -53,21 +78,12 @@ app.controller('MainController', [
 			$scope.reverse = !$scope.reverse;
 		};
 
-		$scope.delete = (id: number) => {
-			$http.delete(root + 'api/location/' + id).then(() => {
-				console.log('Lokace ' + id + 'smazána');
-				// updatujeme seznam
-				nactiLokace();
-			});
-		};
-
-		function nactiLokace() {
-			$http.get(root + 'api/locations').then((locations: any) => {
-				console.log('Načítám lokace');
-				$scope.locations = locations.data;
-			});
-		}
-		nactiLokace();
+		$http.get(root + 'api/locations').then((locations: any) => {
+			console.log('Načítám lokace');
+			$scope.locations = locations.data;
+			const date = new Date($scope.locations.date);
+			$scope.locations.date = new Date($scope.locations.date);
+		});
 	}
 ]);
 
@@ -75,28 +91,35 @@ app.controller('LocationController', [
 	'$scope',
 	'$http',
 	'$routeParams',
-	($scope: any, $http: any, $routeParams: any) => {
+	'$location',
+	($scope: any, $http: any, $routeParams: any, $location: any) => {
 		$scope.root = root;
 		const id = $routeParams.id;
 		$http.get(root + 'api/location/' + id).then((location: any) => {
 			$scope.location = location.data;
 		});
+
+		$scope.delete = (id: number) => {
+			$http.delete(root + 'api/location/' + id).then(() => {
+				console.log('Lokace ' + id + 'smazána');
+				$location.path('all');
+			});
+		};
 	}
 ]);
 
-app.controller('CreateController', [
+app.controller('AddController', [
 	'$scope',
 	'$http',
 	'$location',
 	'$httpParamSerializerJQLike',
 	($scope: any, $http: any, $location: any, $httpParamSerializerJQLike: any) => {
-		console.log('run create');
+		console.log('Add Controller');
 		$scope.gps = '0N 0E';
 		if (window.navigator.geolocation) {
 			window.navigator.geolocation.getCurrentPosition((position: any) => {
 				$scope.$apply(() => {
 					$scope.gps = position.coords.latitude.toString().slice(0, 10) + 'N ' + position.coords.longitude.toString().slice(0, 10) + 'E';
-					console.log(position.coords.longitude);
 				});
 			});
 		}
@@ -104,40 +127,42 @@ app.controller('CreateController', [
 			console.log('Geolocation is not supported by this browser.');
 		}
 
-		$scope.uloz = () => {
-			const file = $scope.myFile;
-			const uploadUrl = root + 'api/savedata';
-			const fd = new FormData();
-			fd.append('file', file);
+		$scope.save = () => {
+			if ($scope.title && $scope.content && $scope.gps && $scope.myFile) {
+				const file = $scope.myFile;
+				const uploadUrl = root + 'api/savedata';
+				const fd = new FormData();
+				fd.append('file', file);
 
-			$http
-				.post(uploadUrl, fd, {
-					transformRequest: angular.identity,
-					headers: { 'Content-Type': undefined }
-				})
-				.then((imageName: any) => {
-					console.log('Image upload done:', imageName.data);
-					const locationData = {
-						title: $scope.title,
-						content: $scope.content,
-						user: 'root',
-						gps: $scope.gps,
-						tags: $scope.tags,
-						images: imageName.data
-					};
-					$http({
-						method: 'POST',
-						url: root + 'api/location',
-						data: $httpParamSerializerJQLike(locationData),
-						headers: { 'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8' }
-					}).then((res: any) => {
-						console.log('Create response:', res.toString());
-						$location.path('all');
+				$http
+					.post(uploadUrl, fd, {
+						transformRequest: angular.identity,
+						headers: { 'Content-Type': undefined }
+					})
+					.then((imageName: any) => {
+						console.log('Image upload done:', imageName.data);
+						const locationData = {
+							title: $scope.title,
+							content: $scope.content,
+							user: 'root',
+							gps: $scope.gps,
+							tags: $scope.tags,
+							images: imageName.data
+						};
+						$http({
+							method: 'POST',
+							url: root + 'api/location',
+							data: $httpParamSerializerJQLike(locationData),
+							headers: { 'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8' }
+						}).then((res: any) => {
+							console.log('Create response:', res.toString());
+							$location.path('all');
+						});
+					})
+					.catch((err: any) => {
+						console.log('Upload err :-(', err);
 					});
-				})
-				.catch((err: any) => {
-					console.log('Upload err :-(', err);
-				});
+			}
 		};
 	}
 ]);
@@ -149,7 +174,7 @@ app.controller('UpdateController', [
 	'$httpParamSerializerJQLike',
 	'$location',
 	($scope: any, $http: any, $routeParams: any, $httpParamSerializerJQLike: any, $location: any) => {
-		//nacti data
+		// Load data
 		const id = $routeParams.id;
 		$http.get(root + 'api/location/' + id).then((location: any) => {
 			const data = location.data;
@@ -160,6 +185,7 @@ app.controller('UpdateController', [
 			$scope.images = data.images;
 		});
 
+		// Update data
 		$scope.update = () => {
 			const data = {
 				title: $scope.title,
@@ -176,7 +202,7 @@ app.controller('UpdateController', [
 				data: $httpParamSerializerJQLike(data),
 				headers: { 'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8' }
 			}).then((res: any) => {
-				console.log('update response: ' + res.toString());
+				console.log('Update response: ' + res.toString());
 				$location.path('location/' + id);
 			});
 		};

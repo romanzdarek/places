@@ -1,25 +1,27 @@
-<div class="padding">
+<div class="jumbotron">
+    <h1>Find the location</h1>      
     <div class="form-group">
-        <label for="inputlg">Search locations</label>
-        <input class="form-control input-lg" id="inputlg" type="text" ng-model="myFilter.title">
+        <input class="form-control input-lg" id="inputlg" placeholder="location name..." type="text" ng-model="myFilter.title">
     </div>
-    
-    
-    <table class="table table-striped table-bordered table-hover">
-        <tr>
-            <th ng-click="sort('id')">ID</th><th>Image</th><th  ng-click="sort('title')">Title</th><th  ng-click="sort('content')">Content</th><th ng-click="sort('gps')">GPS</th><th>Update</th><th>Delete</th>
-        </tr>
-        </tr>
-        <tr ng-repeat="location in locations | filter: myFilter | orderBy: sortBy:reverse">
-            <td><a ng-click="changeUrl(myFilter.title)" href="#!/location/{{location.id}}">{{location.id}}</a></td>
-            <td><a ng-click="changeUrl(myFilter.title)" href="#!/location/{{location.id}}"><img class="img-thumbnail" style="width:200px;" src="{{root}}uploads/{{location.images}}"></td></a></td>
-            <td>{{location.title}}</td><td>{{location.content}}</td>
-            <td>{{location.gps}}</td><td><a href="#!/update/{{location.id}}" type="button" class="btn btn-info">Update</a></td>
-            <td>
-                <button ng-click="delete(location.id)" type="button" class="btn btn-danger">
-                    Delete
-                </button>
-            </td>
-        </tr>
-    </table>
 </div>
+
+<table class="table table-striped table-bordered table-hover">
+    <tr>
+        <th class="pointer" ng-click="sort('id')"><span class="glyphicon glyphicon-sort"></span> ID</th>
+        <th class="pointer" ng-click="sort('title')"><span class="glyphicon glyphicon-sort"></span> Title</th>
+        <th class="pointer" ng-click="sort('content')"><span class="glyphicon glyphicon-sort"></span> Content</th>
+        <th class="pointer" ng-click="sort('date')"><span class="glyphicon glyphicon-sort"></span> Date</th>
+        <th>Image</th>
+    </tr>
+    </tr>
+        <tr ng-repeat="location in locations | filter: myFilter | orderBy: sortBy:reverse">
+                <td>{{location.id}}</td>
+                <td>{{location.title}}</td><td>{{location.content}}</td>
+                <td>{{location.date | DateFromMiliseonds}}</td>
+                <td>
+                    <a ng-click="changeUrl(myFilter.title)" href="#!/location/{{location.id}}">
+                        <img class="img-thumbnail" style="width:200px;" ng-src="{{root}}uploads/{{location.images}}">
+                    </a>
+                </td>
+        </tr>
+</table>
